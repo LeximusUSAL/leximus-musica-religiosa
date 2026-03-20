@@ -193,6 +193,7 @@
   hr.light { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
   .num-highlight { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
   .section-intro { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+  .source-note { background: #fffbf0; border: 1px solid #e8c96a; border-radius: 8px; padding: 0.85rem 1.1rem; font-size: 0.86rem; line-height: 1.65; color: #3d2b00; }
 </style>
 </head>
 <body>
@@ -266,20 +267,16 @@
         <div class="card-title"><span class="icon">🏷</span> Temas principales</div>
         <div class="tags" id="themes-list"></div>
       </div>
-      <div class="g2">
-        <div class="card">
-          <div class="card-title"><span class="icon">📊</span> Distribución de sentimientos</div>
-          <div class="chart-wrap"><canvas id="chart-sent"></canvas></div>
-        </div>
+      <div class="source-note">
+        <strong>⚠ Nota sobre el corpus:</strong> Los datos de este análisis proceden exclusivamente de la <em>Ilustración Musical Hispano-Americana</em> (Barcelona, 1888–1896), digitalizada en la Biblioteca Nacional de España. No representan la totalidad del corpus LexiMus.
+      </div>
+      <div class="source-note" style="margin-top:0.7rem;background:#f0f7ff;border-color:#90c8f0;">
+        <strong>📖 Contexto académico:</strong> Este trabajo completa un artículo elaborado por <strong>Eugenia Gallego</strong> (Universitat Internacional de València, VIU) sobre el léxico de la música religiosa en la prensa musical española del siglo XIX.
+      </div>
+      <div class="g2" style="margin-top:1.3rem">
         <div class="card">
           <div class="card-title"><span class="icon">📅</span> Frecuencia por año</div>
           <div class="chart-wrap"><canvas id="chart-freq-mini"></canvas></div>
-        </div>
-      </div>
-      <div class="g2">
-        <div class="card">
-          <div class="card-title"><span class="icon">📰</span> Top publicaciones (menciones)</div>
-          <div class="chart-wrap"><canvas id="chart-pubs-mini"></canvas></div>
         </div>
         <div class="card">
           <div class="card-title"><span class="icon">👤</span> Top entidades co-ocurrentes</div>
@@ -556,26 +553,11 @@ function renderResumen(A, concs) {
     const s = document.createElement('span'); s.className='tag'; s.textContent=t; tl.appendChild(s);
   });
 
-  // Sentiment donut
-  const sc = {};
-  concs.forEach(c => { const s=c.sentiment||'Desconocido'; sc[s]=(sc[s]||0)+1; });
-  const slabels = Object.keys(sc), svals = slabels.map(l=>sc[l]);
-  const scols = slabels.map(l => l==='Positivo'?'#4caf50':l==='Negativo'?'#f44336':l==='Neutro'?'#2196f3':'#9e9e9e');
-  makeChart('chart-sent','doughnut',slabels,svals,scols,'',{cutout:'58%',plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}});
-
   // Freq mini (from frequencyOverTime)
   const ft = A.frequencyOverTime||[];
   ft.sort((a,b)=>a.year-b.year);
   makeChart('chart-freq-mini','bar',ft.map(x=>x.year),ft.map(x=>x.count),Array(ft.length).fill('#7a5298'),'Menciones',
     {plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:5}}}});
-
-  // Top pubs
-  const pc = {};
-  concs.forEach(c => { const p=shortPub(c.sourceFile); pc[p]=(pc[p]||0)+1; });
-  const sortedPubs = Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  makeChart('chart-pubs-mini','bar',sortedPubs.map(([k])=>k),sortedPubs.map(([,v])=>v),
-    sortedPubs.map((_,i)=>`hsl(265,${40+i*3}%,${45+i*2}%)`), 'Menciones',
-    {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}});
 
   // Top coent
   const topCo = [...A.cooccurringEntities].sort((a,b)=>b.count-a.count).slice(0,10);
@@ -590,8 +572,11 @@ function renderResumen(A, concs) {
 function renderMarcos(A) {
   const el = document.getElementById('frames-list');
   A.discursiveFrames.forEach(f => {
-    const quotes = (f.representativeQuotes||[]).map(q =>
-      `<div class="frame-quote">«${esc(q)}»</div>`).join('');
+    const quotes = (f.representativeQuotes||[]).map(q => {
+      const text = typeof q === 'object' ? q.quote : q;
+      const src  = typeof q === 'object' && q.sourceFile ? `<span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-top:0.3rem">📁 ${esc(q.sourceFile)}</span>` : '';
+      return `<div class="frame-quote">«${esc(text)}»${src}</div>`;
+    }).join('');
     el.innerHTML += `
       <div class="frame-card">
         <div class="frame-title">📌 ${esc(f.frameTitle)}</div>
