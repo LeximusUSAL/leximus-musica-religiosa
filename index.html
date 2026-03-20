@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiMus — «Música Religiosa» en la prensa musical española</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #4a2d6b;
+    --primary-light: #6b4a8e;
+    --accent: #b87c2e;
+    --accent-light: #d4973c;
+    --bg: #f5f3f0;
+    --card: #ffffff;
+    --text: #1e1e1e;
+    --text-muted: #666;
+    --border: #ddd8d2;
+    --tag-bg: #ede6f8;
+    --tag-color: #4a2d6b;
+    --frame-bg: #faf8ff;
+    --positive: #2e7d32;
+    --negative: #c62828;
+    --neutral: #1565c0;
+    --unknown: #757575;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); line-height: 1.65; font-size: 15px; }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(140deg, var(--primary) 0%, #2b1440 100%);
+    color: #fff; padding: 2rem 2.5rem 1.5rem;
+    border-bottom: 5px solid var(--accent);
+  }
+  .header-grid { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .header-left .sup { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; margin-bottom: 0.25rem; }
+  header h1 { font-size: 2rem; font-weight: normal; line-height: 1.2; }
+  header h1 em { color: var(--accent-light); font-style: italic; }
+  .header-left .sub { font-size: 0.82rem; opacity: 0.65; margin-top: 0.4rem; font-style: italic; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+  .badge { background: var(--accent); color: #fff; border-radius: 999px; padding: 0.3rem 1rem; font-size: 0.78rem; font-weight: bold; white-space: nowrap; }
+  .badge-outline { border: 1px solid rgba(255,255,255,0.35); border-radius: 999px; padding: 0.25rem 0.85rem; font-size: 0.75rem; opacity: 0.75; white-space: nowrap; }
+  .stats-bar { display: flex; flex-wrap: wrap; gap: 1.8rem; margin-top: 1.4rem; background: rgba(255,255,255,0.08); border-radius: 10px; padding: 0.9rem 1.4rem; }
+  .stat { text-align: center; }
+  .stat .n { font-size: 1.9rem; font-weight: bold; color: var(--accent-light); line-height: 1; }
+  .stat .l { font-size: 0.68rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.15rem; }
+
+  /* ── FILE LOADER ── */
+  #loader-section { background: #fff8e1; border: 1px solid #f9a825; border-radius: 8px; margin: 1.5rem 2.5rem; padding: 1.2rem 1.5rem; display: none; }
+  #loader-section h3 { color: #e65100; margin-bottom: 0.5rem; font-size: 0.9rem; }
+  #loader-section p { font-size: 0.82rem; color: #5d4037; margin-bottom: 0.7rem; }
+  .file-inputs { display: flex; flex-direction: column; gap: 0.4rem; }
+  .fl { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; }
+  .btn-load { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 0.45rem 1.1rem; cursor: pointer; font-size: 0.82rem; margin-top: 0.7rem; }
+  .btn-load:hover { background: var(--primary-light); }
+
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.8rem; overflow-x: auto; background: #fff; border-radius: 10px 10px 0 0; padding: 0 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .tab { background: none; border: none; padding: 0.75rem 1.1rem; cursor: pointer; font-family: inherit; font-size: 0.85rem; color: var(--text-muted); border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all 0.18s; }
+  .tab:hover { color: var(--primary); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* ── CARDS ── */
+  .card { background: var(--card); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); padding: 1.5rem 1.8rem; margin-bottom: 1.3rem; border: 1px solid var(--border); }
+  .card-title { font-size: 1rem; color: var(--primary); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; font-weight: bold; }
+  .card-title .icon { font-size: 1.1rem; }
+
+  /* ── GRID ── */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.3rem; }
+  @media (max-width: 860px) { .g2, .g3 { grid-template-columns: 1fr; } }
+
+  /* ── SUMMARY ── */
+  .summary-text { font-size: 0.92rem; line-height: 1.8; text-align: justify; color: var(--text); }
+  .sentiment-box { background: #faf6f0; border-left: 4px solid var(--accent); padding: 0.9rem 1.2rem; border-radius: 0 8px 8px 0; font-size: 0.88rem; color: #3d2b00; font-style: italic; line-height: 1.75; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .tag { background: var(--tag-bg); color: var(--tag-color); padding: 0.3rem 0.9rem; border-radius: 999px; font-size: 0.8rem; border: 1px solid #c5b0e5; }
+
+  /* ── ENTITIES ── */
+  .entity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.8rem; }
+  .entity-card { background: var(--frame-bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem; }
+  .entity-num { font-size: 0.7rem; font-weight: bold; color: var(--accent); }
+  .entity-name { font-weight: bold; color: var(--primary); font-size: 0.92rem; margin-top: 0.1rem; }
+  .entity-type { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; font-style: italic; }
+
+  /* ── FRAMES ── */
+  .frame-card { background: var(--frame-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1.1rem; }
+  .frame-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); margin-bottom: 0.6rem; }
+  .frame-desc { font-size: 0.86rem; line-height: 1.72; color: var(--text); text-align: justify; }
+  .frame-quotes { margin-top: 0.8rem; }
+  .frame-quote { background: #fff; border-left: 3px solid var(--accent); padding: 0.5rem 0.8rem; margin-top: 0.5rem; font-size: 0.82rem; font-style: italic; color: #3d2d00; border-radius: 0 4px 4px 0; }
+
+  /* ── ROLES ── */
+  .role-card { background: var(--frame-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.3rem; }
+  .role-category { font-size: 0.8rem; font-weight: bold; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .role-desc { font-size: 0.84rem; line-height: 1.7; color: var(--text); margin-top: 0.4rem; text-align: justify; }
+  .role-entities { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.7rem; }
+  .re { background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.73rem; color: var(--primary-light); }
+
+  /* ── ADJECTIVES ── */
+  .adj-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  .adj-table th { background: var(--primary); color: #fff; padding: 0.5rem 0.7rem; text-align: left; font-weight: normal; font-size: 0.78rem; }
+  .adj-table td { padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .adj-table tr:last-child td { border-bottom: none; }
+  .adj-table tr:hover td { background: #f9f6ff; }
+  .adj-desc { background: var(--tag-bg); color: var(--tag-color); border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.73rem; font-style: italic; display: inline-block; }
+  .adj-word { font-weight: bold; color: var(--primary); }
+  .evidence { color: var(--text-muted); font-style: italic; font-size: 0.78rem; }
+
+  /* ── VERBS ── */
+  .verbs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .verbs-grid { grid-template-columns: 1fr; } }
+  .verbs-col h3 { font-size: 0.8rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.06em; padding: 0.4rem 0.8rem; background: var(--tag-bg); border-radius: 6px; margin-bottom: 0.6rem; }
+  .verb-item { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.83rem; }
+  .verb-item:last-child { border-bottom: none; }
+  .verb-word { font-weight: bold; color: var(--primary); min-width: 100px; }
+  .verb-count { background: var(--accent); color: #fff; border-radius: 999px; padding: 0.05rem 0.45rem; font-size: 0.68rem; min-width: 22px; text-align: center; flex-shrink: 0; }
+  .verb-ex { color: var(--text-muted); font-style: italic; font-size: 0.77rem; line-height: 1.4; }
+
+  /* ── RELATIONS ── */
+  .relation-item { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding: 0.65rem 0.9rem; background: var(--frame-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.86rem; }
+  .rel-a { font-weight: bold; color: var(--primary); }
+  .rel-r { background: var(--accent); color: #fff; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.75rem; font-style: italic; }
+  .rel-b { color: var(--primary-light); font-style: italic; }
+  .rel-quote { display: block; width: 100%; color: var(--text-muted); font-style: italic; font-size: 0.77rem; margin-top: 0.2rem; }
+
+  /* ── ENTITIES CO-OCC ── */
+  .coent-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  .coent-table th { background: var(--primary); color: #fff; padding: 0.5rem 0.7rem; text-align: left; font-weight: normal; font-size: 0.78rem; }
+  .coent-table td { padding: 0.4rem 0.7rem; border-bottom: 1px solid var(--border); }
+  .coent-table tr:last-child td { border-bottom: none; }
+  .coent-table tr:hover td { background: #f9f6ff; }
+  .type-badge { border-radius: 4px; padding: 0.1rem 0.45rem; font-size: 0.7rem; font-weight: bold; }
+  .type-PERSONA, .type-PERSON { background: #e8eaf6; color: #283593; }
+  .type-LUGAR  { background: #e8f5e9; color: #1b5e20; }
+  .type-ORG    { background: #fff8e1; color: #e65100; }
+  .count-bar   { display: flex; align-items: center; gap: 0.4rem; }
+  .mini-bar    { height: 6px; background: var(--primary-light); border-radius: 3px; }
+
+  /* ── CHARTS ── */
+  .chart-wrap { position: relative; height: 260px; }
+  .chart-tall  { position: relative; height: 340px; }
+  .chart-xlarge { position: relative; height: 420px; }
+
+  /* ── CONCORDANCES / PATTERNS ── */
+  .search-row { display: flex; gap: 0.55rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+  .search-row input, .search-row select { border: 1px solid var(--border); border-radius: 6px; padding: 0.42rem 0.75rem; font-size: 0.85rem; font-family: inherit; background: #fff; }
+  .search-row input { flex: 1; min-width: 180px; }
+  .search-row select { min-width: 140px; }
+  .count-label { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+
+  .conc-item { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.75rem; transition: box-shadow 0.15s; }
+  .conc-item:hover { box-shadow: 0 2px 10px rgba(74,45,107,0.1); }
+  .conc-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+  .m-year { background: var(--primary); color: #fff; border-radius: 4px; padding: 0.12rem 0.5rem; font-size: 0.72rem; font-weight: bold; }
+  .m-pub { background: var(--tag-bg); color: var(--tag-color); border-radius: 4px; padding: 0.12rem 0.55rem; font-size: 0.7rem; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .m-sent { border-radius: 4px; padding: 0.12rem 0.5rem; font-size: 0.7rem; }
+  .s-positivo   { background: #e8f5e9; color: var(--positive); }
+  .s-negativo   { background: #ffebee; color: var(--negative); }
+  .s-neutro     { background: #e3eaf5; color: var(--neutral); }
+  .s-desconocido { background: #f0f0f0; color: var(--unknown); }
+  .conc-text { font-size: 0.87rem; line-height: 1.7; font-family: 'Georgia', serif; }
+  .conc-text mark { background: #fff3b0; border-radius: 2px; padding: 0 2px; color: inherit; }
+  .conc-entities { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
+  .ent-badge { background: #e8eaf6; color: #283593; border-radius: 4px; padding: 0.1rem 0.45rem; font-size: 0.7rem; }
+  .pat-badge { background: #e0f7e0; color: #1b5e20; border-radius: 4px; padding: 0.1rem 0.45rem; font-size: 0.7rem; font-style: italic; }
+
+  /* ── PAGINATION ── */
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 0.4rem; margin-top: 1rem; flex-wrap: wrap; }
+  .pg { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.7rem; cursor: pointer; font-size: 0.82rem; font-family: inherit; transition: all 0.15s; }
+  .pg:hover { background: var(--tag-bg); border-color: var(--primary); }
+  .pg.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .pg:disabled { opacity: 0.35; cursor: default; }
+  .pg-info { font-size: 0.78rem; color: var(--text-muted); }
+
+  /* ── MISC ── */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-style: italic; font-size: 0.88rem; }
+  .loading-msg { display: flex; align-items: center; gap: 0.8rem; padding: 4rem 2rem; color: var(--text-muted); justify-content: center; font-size: 0.9rem; }
+  .spinner { width: 26px; height: 26px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--primary); color: #fff; padding: 0.5rem 0.7rem; text-align: left; font-weight: normal; font-size: 0.78rem; }
+  td { padding: 0.42rem 0.7rem; border-bottom: 1px solid var(--border); font-size: 0.83rem; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f9f6ff; }
+  hr.light { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+  .num-highlight { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+  .section-intro { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-grid">
+    <div class="header-left">
+      <div class="sup">LexiMus · Léxico y ontología de la música en español · PID2022-139589NB-C33</div>
+      <h1>Término: <em>«música religiosa»</em></h1>
+      <div class="sub">Análisis semántico en prensa musical española histórica · Corpus digitalizado BNE</div>
+    </div>
+    <div class="header-right">
+      <div class="badge" id="badge-total">Cargando…</div>
+      <div class="badge-outline" id="badge-export"></div>
+    </div>
+  </div>
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat"><div class="n" id="s-total">—</div><div class="l">menciones</div></div>
+    <div class="stat"><div class="n" id="s-concs">—</div><div class="l">concordancias</div></div>
+    <div class="stat"><div class="n" id="s-pubs">—</div><div class="l">publicaciones</div></div>
+    <div class="stat"><div class="n" id="s-years">—</div><div class="l">años</div></div>
+    <div class="stat"><div class="n" id="s-ents">—</div><div class="l">entidades clave</div></div>
+    <div class="stat"><div class="n" id="s-adj">—</div><div class="l">descriptores adjetivales</div></div>
+    <div class="stat"><div class="n" id="s-verbs">—</div><div class="l">verbos asociados</div></div>
+    <div class="stat"><div class="n" id="s-coent">—</div><div class="l">entidades co-ocurrentes</div></div>
+    <div class="stat"><div class="n" id="s-pat">—</div><div class="l">ocurrencias patrón</div></div>
+  </div>
+</header>
+
+<div id="loader-section">
+  <h3>⚠ Carga manual de archivos</h3>
+  <p>El navegador no puede leer archivos locales directamente. Selecciona los tres JSON:</p>
+  <div class="file-inputs">
+    <label class="fl"><strong>Análisis principal:</strong> <input type="file" id="f-analisis" accept=".json"></label>
+    <label class="fl"><strong>Patrones:</strong> <input type="file" id="f-patrones" accept=".json"></label>
+    <label class="fl"><strong>Concordancias:</strong> <input type="file" id="f-concordancias" accept=".json"></label>
+  </div>
+  <button class="btn-load" onclick="loadFromFiles()">Cargar archivos</button>
+</div>
+
+<div class="main">
+  <div id="loading-indicator" class="loading-msg"><div class="spinner"></div> Cargando datos del corpus…</div>
+  <div id="app" style="display:none">
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('resumen',this)">📋 Resumen</button>
+      <button class="tab" onclick="showTab('marcos',this)">🗂 Marcos discursivos</button>
+      <button class="tab" onclick="showTab('roles',this)">🎭 Roles</button>
+      <button class="tab" onclick="showTab('entidades',this)">👤 Entidades</button>
+      <button class="tab" onclick="showTab('descriptores',this)">🏷 Descriptores</button>
+      <button class="tab" onclick="showTab('verbos',this)">🔤 Verbos</button>
+      <button class="tab" onclick="showTab('relaciones',this)">🔗 Relaciones</button>
+      <button class="tab" onclick="showTab('frecuencia',this)">📈 Frecuencia</button>
+      <button class="tab" onclick="showTab('concordancias',this)">📄 Concordancias</button>
+      <button class="tab" onclick="showTab('patrones',this)">🔍 Patrones</button>
+      <button class="tab" onclick="showTab('publicaciones',this)">📰 Publicaciones</button>
+    </div>
+
+    <!-- ═══ RESUMEN ═══ -->
+    <div class="tab-content active" id="tab-resumen">
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span> Síntesis del análisis</div>
+        <p class="summary-text" id="summary-text"></p>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">💬</span> Análisis de sentimiento general</div>
+        <div class="sentiment-box" id="sentiment-text"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🏷</span> Temas principales</div>
+        <div class="tags" id="themes-list"></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title"><span class="icon">📊</span> Distribución de sentimientos</div>
+          <div class="chart-wrap"><canvas id="chart-sent"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📅</span> Frecuencia por año</div>
+          <div class="chart-wrap"><canvas id="chart-freq-mini"></canvas></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title"><span class="icon">📰</span> Top publicaciones (menciones)</div>
+          <div class="chart-wrap"><canvas id="chart-pubs-mini"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">👤</span> Top entidades co-ocurrentes</div>
+          <div class="chart-wrap"><canvas id="chart-coent-mini"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MARCOS DISCURSIVOS ═══ -->
+    <div class="tab-content" id="tab-marcos">
+      <div class="card">
+        <div class="card-title"><span class="icon">🗂</span> Marcos discursivos identificados</div>
+        <p class="section-intro">Estructuras de sentido que organizan el debate sobre «música religiosa» en el corpus.</p>
+        <div id="frames-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══ ROLES ═══ -->
+    <div class="tab-content" id="tab-roles">
+      <div class="card">
+        <div class="card-title"><span class="icon">🎭</span> Análisis de roles del término</div>
+        <p class="section-intro">Dimensiones en las que «música religiosa» aparece en el discurso histórico.</p>
+        <div id="roles-list" class="g2"></div>
+      </div>
+    </div>
+
+    <!-- ═══ ENTIDADES ═══ -->
+    <div class="tab-content" id="tab-entidades">
+      <div class="card">
+        <div class="card-title"><span class="icon">⭐</span> Entidades clave en el análisis</div>
+        <div id="key-entities-list" class="entity-grid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🌐</span> Entidades co-ocurrentes en el corpus</div>
+        <p class="section-intro" id="coent-intro"></p>
+        <div class="search-row">
+          <input type="text" id="coent-search" placeholder="Buscar entidad…" oninput="filterCoent()">
+          <select id="coent-type" onchange="filterCoent()"><option value="">Todos los tipos</option></select>
+          <span class="count-label" id="coent-count"></span>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Entidad</th><th>Tipo</th><th>Co-ocurrencias</th><th>Proporción</th></tr></thead>
+          <tbody id="coent-tbody"></tbody>
+        </table>
+        <div class="pagination" id="coent-pagination"></div>
+      </div>
+    </div>
+
+    <!-- ═══ DESCRIPTORES ADJETIVALES ═══ -->
+    <div class="tab-content" id="tab-descriptores">
+      <div class="card">
+        <div class="card-title"><span class="icon">🏷</span> Descriptores adjetivales (<span id="adj-count-title"></span>)</div>
+        <div class="g2" style="margin-bottom:1.3rem">
+          <div>
+            <div class="card-title" style="font-size:0.85rem">Distribución por categoría</div>
+            <div class="chart-wrap"><canvas id="chart-adj-cat"></canvas></div>
+          </div>
+          <div>
+            <div class="card-title" style="font-size:0.85rem">Adjetivos por frecuencia</div>
+            <div class="chart-wrap"><canvas id="chart-adj-top"></canvas></div>
+          </div>
+        </div>
+        <div class="search-row">
+          <input type="text" id="adj-search" placeholder="Buscar descriptor…" oninput="filterAdj()">
+          <select id="adj-cat" onchange="filterAdj()"><option value="">Todas las categorías</option></select>
+          <span class="count-label" id="adj-count-label"></span>
+        </div>
+        <table class="adj-table">
+          <thead><tr><th>Descriptor</th><th>Categoría</th><th>Frec.</th><th>Cita de evidencia</th></tr></thead>
+          <tbody id="adj-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ VERBOS ═══ -->
+    <div class="tab-content" id="tab-verbos">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔤</span> Verbos asociados al término</div>
+        <p class="section-intro" id="verbs-intro"></p>
+        <div class="g2" style="margin-bottom:1.3rem">
+          <div>
+            <div class="card-title" style="font-size:0.85rem">Distribución por rol sintáctico</div>
+            <div class="chart-wrap"><canvas id="chart-verb-roles"></canvas></div>
+          </div>
+          <div>
+            <div class="card-title" style="font-size:0.85rem">Verbos más frecuentes</div>
+            <div class="chart-wrap"><canvas id="chart-verb-top"></canvas></div>
+          </div>
+        </div>
+        <div class="verbs-grid" id="verbs-cols"></div>
+      </div>
+    </div>
+
+    <!-- ═══ RELACIONES ═══ -->
+    <div class="tab-content" id="tab-relaciones">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔗</span> Contexto relacional del término</div>
+        <p class="section-intro">Relaciones semánticas identificadas en el corpus entre «música religiosa» y otras entidades o conceptos.</p>
+        <div id="relations-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══ FRECUENCIA ═══ -->
+    <div class="tab-content" id="tab-frecuencia">
+      <div class="card">
+        <div class="card-title"><span class="icon">📈</span> Frecuencia del término por año</div>
+        <p class="section-intro">Distribución de menciones de «música religiosa» extraída del análisis del corpus.</p>
+        <div class="chart-tall"><canvas id="chart-freq-full"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📅</span> Distribución por décadas (concordancias)</div>
+        <div class="chart-wrap"><canvas id="chart-decades"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span> Tabla de frecuencias anuales</div>
+        <table>
+          <thead><tr><th>Año</th><th>Menciones</th><th>Distribución</th></tr></thead>
+          <tbody id="freq-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ CONCORDANCIAS ═══ -->
+    <div class="tab-content" id="tab-concordancias">
+      <div class="card">
+        <div class="card-title"><span class="icon">📄</span> Concordancias completas del corpus — texto íntegro de los fragmentos</div>
+        <div class="search-row">
+          <input type="text" id="conc-search" placeholder="Buscar en el texto…" oninput="filterConc()">
+          <select id="conc-year" onchange="filterConc()"><option value="">Todos los años</option></select>
+          <select id="conc-sent" onchange="filterConc()">
+            <option value="">Todos los sentimientos</option>
+            <option>Positivo</option><option>Negativo</option><option>Neutro</option><option>Desconocido</option>
+          </select>
+          <select id="conc-pub" onchange="filterConc()"><option value="">Todas las publicaciones</option></select>
+          <span class="count-label" id="conc-count"></span>
+        </div>
+        <div id="conc-list"></div>
+        <div class="pagination" id="conc-pag"></div>
+      </div>
+    </div>
+
+    <!-- ═══ PATRONES ═══ -->
+    <div class="tab-content" id="tab-patrones">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔍</span> Resultados de búsqueda por patrón</div>
+        <div class="search-row">
+          <input type="text" id="pat-search" placeholder="Buscar en el texto…" oninput="filterPat()">
+          <select id="pat-pub" onchange="filterPat()"><option value="">Todas las publicaciones</option></select>
+          <span class="count-label" id="pat-count"></span>
+        </div>
+        <div id="pat-list"></div>
+        <div class="pagination" id="pat-pag"></div>
+      </div>
+    </div>
+
+    <!-- ═══ PUBLICACIONES ═══ -->
+    <div class="tab-content" id="tab-publicaciones">
+      <div class="card">
+        <div class="card-title"><span class="icon">📰</span> Distribución por publicación</div>
+        <div class="chart-xlarge"><canvas id="chart-pubs-full"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span> Tabla completa por publicación</div>
+        <table>
+          <thead><tr><th>#</th><th>Publicación</th><th>Archivo fuente</th><th>Año(s)</th><th>Menciones</th><th>%</th></tr></thead>
+          <tbody id="pubs-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- #app -->
+</div><!-- .main -->
+
+<script>
+// ════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════
+let D = { analisis: null, patrones: null, concordancias: null };
+
+const CONC_PER = 25, PAT_PER = 25, COENT_PER = 50;
+let concPage = 1, patPage = 1, coentPage = 1;
+let filtConc = [], filtPat = [], filtCoent = [];
+
+const FILES = {
+  analisis: 'analisis_musica_religiosa.json',
+  patrones: 'patrones.json',
+  concordancias: 'concordancias.json'
+};
+
+// ════════════════════════════════════════════
+// LOAD
+// ════════════════════════════════════════════
+async function init() {
+  try {
+    const [a, p, c] = await Promise.all([
+      fetch(FILES.analisis).then(r => { if (!r.ok) throw 1; return r.json(); }),
+      fetch(FILES.patrones).then(r => { if (!r.ok) throw 1; return r.json(); }),
+      fetch(FILES.concordancias).then(r => { if (!r.ok) throw 1; return r.json(); })
+    ]);
+    D = { analisis: a, patrones: p, concordancias: c };
+    render();
+  } catch {
+    document.getElementById('loading-indicator').style.display = 'none';
+    document.getElementById('loader-section').style.display = 'block';
+  }
+}
+
+function loadFromFiles() {
+  const fa = document.getElementById('f-analisis').files[0];
+  const fp = document.getElementById('f-patrones').files[0];
+  const fc = document.getElementById('f-concordancias').files[0];
+  if (!fa || !fp || !fc) { alert('Selecciona los tres archivos.'); return; }
+  let n = 0;
+  const done = () => { if (++n === 3) render(); };
+  [[fa,'analisis'],[fp,'patrones'],[fc,'concordancias']].forEach(([file,key]) => {
+    const r = new FileReader();
+    r.onload = e => { D[key] = JSON.parse(e.target.result); done(); };
+    r.readAsText(file,'utf-8');
+  });
+}
+
+// ════════════════════════════════════════════
+// MAIN RENDER
+// ════════════════════════════════════════════
+function render() {
+  document.getElementById('loading-indicator').style.display = 'none';
+  document.getElementById('loader-section').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const A = D.analisis;
+  const concs = D.concordancias || A.concordances || [];
+  const pats  = D.patrones || [];
+
+  // Header badges
+  document.getElementById('badge-total').textContent = `${A.totalMentionsInCorpus} menciones totales`;
+  if (A.exportedAt) document.getElementById('badge-export').textContent = 'Exportado: ' + A.exportedAt.substring(0,10);
+
+  // Stats
+  const years = concs.map(c=>c.publicationYear).filter(Boolean);
+  const yearSet = [...new Set(years)];
+  const pubs  = [...new Set(concs.map(c=>shortPub(c.sourceFile)))];
+  document.getElementById('s-total').textContent  = A.totalMentionsInCorpus;
+  document.getElementById('s-concs').textContent  = concs.length;
+  document.getElementById('s-pubs').textContent   = pubs.length;
+  document.getElementById('s-years').textContent  = yearSet.length > 1 ? `${Math.min(...yearSet)}–${Math.max(...yearSet)}` : (yearSet[0]||'—');
+  document.getElementById('s-ents').textContent   = A.summary.keyEntities.length;
+  document.getElementById('s-adj').textContent    = A.adjectivalDescriptors.length;
+  document.getElementById('s-verbs').textContent  = A.associatedVerbs.length;
+  document.getElementById('s-coent').textContent  = A.cooccurringEntities.length;
+  document.getElementById('s-pat').textContent    = pats.length;
+
+  renderResumen(A, concs);
+  renderMarcos(A);
+  renderRoles(A);
+  renderEntidades(A, concs);
+  renderDescriptores(A);
+  renderVerbos(A);
+  renderRelaciones(A);
+  renderFrecuencia(A, concs);
+  renderConcordancias(concs);
+  renderPatrones(pats);
+  renderPublicaciones(concs);
+}
+
+// ════════════════════════════════════════════
+// RESUMEN
+// ════════════════════════════════════════════
+function renderResumen(A, concs) {
+  document.getElementById('summary-text').textContent   = A.summary.summary;
+  document.getElementById('sentiment-text').textContent = A.summary.sentimentBreakdown;
+
+  const tl = document.getElementById('themes-list');
+  A.summary.themes.forEach(t => {
+    const s = document.createElement('span'); s.className='tag'; s.textContent=t; tl.appendChild(s);
+  });
+
+  // Sentiment donut
+  const sc = {};
+  concs.forEach(c => { const s=c.sentiment||'Desconocido'; sc[s]=(sc[s]||0)+1; });
+  const slabels = Object.keys(sc), svals = slabels.map(l=>sc[l]);
+  const scols = slabels.map(l => l==='Positivo'?'#4caf50':l==='Negativo'?'#f44336':l==='Neutro'?'#2196f3':'#9e9e9e');
+  makeChart('chart-sent','doughnut',slabels,svals,scols,'',{cutout:'58%',plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}});
+
+  // Freq mini (from frequencyOverTime)
+  const ft = A.frequencyOverTime||[];
+  ft.sort((a,b)=>a.year-b.year);
+  makeChart('chart-freq-mini','bar',ft.map(x=>x.year),ft.map(x=>x.count),Array(ft.length).fill('#7a5298'),'Menciones',
+    {plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:5}}}});
+
+  // Top pubs
+  const pc = {};
+  concs.forEach(c => { const p=shortPub(c.sourceFile); pc[p]=(pc[p]||0)+1; });
+  const sortedPubs = Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  makeChart('chart-pubs-mini','bar',sortedPubs.map(([k])=>k),sortedPubs.map(([,v])=>v),
+    sortedPubs.map((_,i)=>`hsl(265,${40+i*3}%,${45+i*2}%)`), 'Menciones',
+    {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}});
+
+  // Top coent
+  const topCo = [...A.cooccurringEntities].sort((a,b)=>b.count-a.count).slice(0,10);
+  makeChart('chart-coent-mini','bar',topCo.map(x=>x.name.split(' ').slice(0,2).join(' ')),topCo.map(x=>x.count),
+    topCo.map(x=>x.type==='LUGAR'?'#43a047':x.type==='ORG'?'#fb8c00':'#5c6bc0'),'Co-ocurrencias',
+    {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}});
+}
+
+// ════════════════════════════════════════════
+// MARCOS DISCURSIVOS
+// ════════════════════════════════════════════
+function renderMarcos(A) {
+  const el = document.getElementById('frames-list');
+  A.discursiveFrames.forEach(f => {
+    const quotes = (f.representativeQuotes||[]).map(q =>
+      `<div class="frame-quote">«${esc(q)}»</div>`).join('');
+    el.innerHTML += `
+      <div class="frame-card">
+        <div class="frame-title">📌 ${esc(f.frameTitle)}</div>
+        <div class="frame-desc">${esc(f.description)}</div>
+        ${quotes ? `<div class="frame-quotes"><strong style="font-size:0.78rem;color:var(--text-muted)">CITAS REPRESENTATIVAS</strong>${quotes}</div>` : ''}
+      </div>`;
+  });
+}
+
+// ════════════════════════════════════════════
+// ROLES
+// ════════════════════════════════════════════
+function renderRoles(A) {
+  const el = document.getElementById('roles-list');
+  A.roleAnalysis.forEach(r => {
+    const ents = (r.entities||[]).map(e =>
+      `<span class="re">${esc(e.name||e)}</span>`).join('');
+    el.innerHTML += `
+      <div class="role-card">
+        <div class="role-category">${esc(r.category)}</div>
+        <div class="role-desc">${esc(r.description)}</div>
+        ${ents ? `<div class="role-entities">${ents}</div>` : ''}
+      </div>`;
+  });
+}
+
+// ════════════════════════════════════════════
+// ENTIDADES
+// ════════════════════════════════════════════
+function renderEntidades(A, concs) {
+  const el = document.getElementById('key-entities-list');
+  A.summary.keyEntities.forEach((e,i) => {
+    el.innerHTML += `
+      <div class="entity-card">
+        <div class="entity-num">${i+1}</div>
+        <div class="entity-name">${esc(e.name)}</div>
+        <div class="entity-type">${esc(e.type)}</div>
+      </div>`;
+  });
+
+  // Co-occurring entities
+  document.getElementById('coent-intro').textContent =
+    `${A.cooccurringEntities.length} entidades identificadas como co-ocurrentes con «música religiosa» en el corpus. Se muestran ordenadas por frecuencia.`;
+
+  // Populate type filter
+  const types = [...new Set(A.cooccurringEntities.map(e=>e.type))].sort();
+  const sel = document.getElementById('coent-type');
+  types.forEach(t => { const o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
+
+  filtCoent = [...A.cooccurringEntities].sort((a,b)=>b.count-a.count);
+  renderCoentPage();
+}
+
+function filterCoent() {
+  const q  = document.getElementById('coent-search').value.toLowerCase();
+  const tp = document.getElementById('coent-type').value;
+  filtCoent = D.analisis.cooccurringEntities.filter(e => {
+    return (!q || e.name.toLowerCase().includes(q)) && (!tp || e.type===tp);
+  }).sort((a,b)=>b.count-a.count);
+  coentPage = 1;
+  renderCoentPage();
+}
+
+function renderCoentPage() {
+  const total = filtCoent.length;
+  const max   = filtCoent[0]?.count || 1;
+  const slice = filtCoent.slice((coentPage-1)*COENT_PER, coentPage*COENT_PER);
+  document.getElementById('coent-count').textContent = `${total} entidad${total!==1?'es':''}`;
+
+  const tbody = document.getElementById('coent-tbody');
+  if (!slice.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin resultados.</td></tr>'; document.getElementById('coent-pagination').innerHTML=''; return; }
+  tbody.innerHTML = slice.map((e,i) => {
+    const rank = (coentPage-1)*COENT_PER+i+1;
+    const barW = Math.round((e.count/max)*100);
+    const tclass = `type-${e.type.replace(/[^A-Z]/g,'')}`;
+    return `<tr>
+      <td style="color:var(--text-muted)">${rank}</td>
+      <td><strong>${esc(e.name)}</strong></td>
+      <td><span class="type-badge ${tclass}">${esc(e.type)}</span></td>
+      <td><div class="count-bar"><div class="mini-bar" style="width:${barW}px"></div> <strong>${e.count}</strong></div></td>
+      <td style="color:var(--text-muted);font-size:0.75rem">${((e.count/max)*100).toFixed(0)}%</td>
+    </tr>`;
+  }).join('');
+
+  makePagination('coent', Math.ceil(total/COENT_PER));
+}
+
+// ════════════════════════════════════════════
+// DESCRIPTORES ADJETIVALES
+// ════════════════════════════════════════════
+function renderDescriptores(A) {
+  const adjs = A.adjectivalDescriptors;
+  document.getElementById('adj-count-title').textContent = adjs.length;
+
+  // Category chart
+  const catCount = {};
+  adjs.forEach(a => { catCount[a.category]=(catCount[a.category]||0)+(a.count||1); });
+  const catsSorted = Object.entries(catCount).sort((a,b)=>b[1]-a[1]);
+  makeChart('chart-adj-cat','doughnut',
+    catsSorted.map(([k])=>k.length>25?k.substring(0,22)+'…':k),
+    catsSorted.map(([,v])=>v),
+    catsSorted.map((_,i)=>`hsl(${270+i*12},45%,${40+i*3}%)`), '',
+    {cutout:'50%',plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}});
+
+  // Top adjs by count
+  const topAdj = [...adjs].sort((a,b)=>(b.count||0)-(a.count||0)).slice(0,12);
+  makeChart('chart-adj-top','bar',
+    topAdj.map(a=>a.descriptor),topAdj.map(a=>a.count||1),
+    Array(topAdj.length).fill('#b87c2e'), 'Frecuencia',
+    {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true},y:{ticks:{font:{size:9}}}}});
+
+  // Category filter
+  const cats = [...new Set(adjs.map(a=>a.category))].sort();
+  const sel = document.getElementById('adj-cat');
+  cats.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+
+  renderAdjTable(adjs);
+}
+
+function filterAdj() {
+  const q   = document.getElementById('adj-search').value.toLowerCase();
+  const cat = document.getElementById('adj-cat').value;
+  const adjs = D.analisis.adjectivalDescriptors.filter(a =>
+    (!q || a.descriptor.toLowerCase().includes(q) || (a.evidenceQuote||'').toLowerCase().includes(q)) &&
+    (!cat || a.category===cat)
+  );
+  document.getElementById('adj-count-label').textContent = `${adjs.length} descriptor${adjs.length!==1?'es':''}`;
+  renderAdjTable(adjs);
+}
+
+function renderAdjTable(adjs) {
+  document.getElementById('adj-count-label').textContent = `${adjs.length} descriptor${adjs.length!==1?'es':''}`;
+  const tbody = document.getElementById('adj-tbody');
+  if (!adjs.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin resultados.</td></tr>'; return; }
+  tbody.innerHTML = adjs.map(a => `<tr>
+    <td><span class="adj-word">${esc(a.descriptor)}</span></td>
+    <td><span class="adj-desc">${esc(a.category)}</span></td>
+    <td style="text-align:center">${a.count||1}</td>
+    <td><span class="evidence">«${esc((a.evidenceQuote||'').substring(0,120))}${(a.evidenceQuote||'').length>120?'…':''}»</span></td>
+  </tr>`).join('');
+}
+
+// ════════════════════════════════════════════
+// VERBOS
+// ════════════════════════════════════════════
+function renderVerbos(A) {
+  const verbs = A.associatedVerbs;
+  document.getElementById('verbs-intro').textContent =
+    `${verbs.length} verbos identificados en el corpus en relación con «música religiosa». El término aparece como sujeto en ${verbs.filter(v=>v.role==='SUJETO').length} casos y como objeto en ${verbs.filter(v=>v.role==='OBJETO').length}.`;
+
+  // Role pie
+  const roles = {};
+  verbs.forEach(v => { roles[v.role]=(roles[v.role]||0)+1; });
+  makeChart('chart-verb-roles','pie',Object.keys(roles),Object.values(roles),
+    ['#6b4a8e','#b87c2e','#43a047'], '',
+    {plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}});
+
+  // Top verbs
+  const topV = [...verbs].sort((a,b)=>(b.count||0)-(a.count||0)).slice(0,12);
+  makeChart('chart-verb-top','bar',topV.map(v=>v.verb),topV.map(v=>v.count||1),
+    topV.map(v=>v.role==='SUJETO'?'#6b4a8e':'#b87c2e'), 'Frecuencia',
+    {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{ticks:{font:{size:9}}}}});
+
+  // Split by role
+  const sujeto  = verbs.filter(v=>v.role==='SUJETO').sort((a,b)=>(b.count||0)-(a.count||0));
+  const objeto  = verbs.filter(v=>v.role==='OBJETO').sort((a,b)=>(b.count||0)-(a.count||0));
+  const el = document.getElementById('verbs-cols');
+  el.innerHTML = `
+    <div class="verbs-col">
+      <h3>🎯 Como SUJETO (${sujeto.length})</h3>
+      ${sujeto.map(v => `<div class="verb-item">
+        <span class="verb-count">${v.count||1}</span>
+        <div><span class="verb-word">${esc(v.verb)}</span>
+          <div class="verb-ex">«${esc((v.exampleQuote||'').substring(0,120))}${(v.exampleQuote||'').length>120?'…':''}»</div>
+        </div></div>`).join('')}
+    </div>
+    <div class="verbs-col">
+      <h3>🎯 Como OBJETO (${objeto.length})</h3>
+      ${objeto.map(v => `<div class="verb-item">
+        <span class="verb-count">${v.count||1}</span>
+        <div><span class="verb-word">${esc(v.verb)}</span>
+          <div class="verb-ex">«${esc((v.exampleQuote||'').substring(0,120))}${(v.exampleQuote||'').length>120?'…':''}»</div>
+        </div></div>`).join('')}
+    </div>`;
+}
+
+// ════════════════════════════════════════════
+// RELACIONES
+// ════════════════════════════════════════════
+function renderRelaciones(A) {
+  const el = document.getElementById('relations-list');
+  A.relationalContext.forEach(r => {
+    el.innerHTML += `
+      <div class="relation-item">
+        <span class="rel-a">${esc(r.entityA)}</span>
+        <span class="rel-r">${esc(r.relationship)}</span>
+        <span class="rel-b">${esc(r.entityB)}</span>
+        ${r.evidenceQuote ? `<span class="rel-quote">«${esc(r.evidenceQuote)}»</span>` : ''}
+      </div>`;
+  });
+}
+
+// ════════════════════════════════════════════
+// FRECUENCIA
+// ════════════════════════════════════════════
+function renderFrecuencia(A, concs) {
+  const ft = [...(A.frequencyOverTime||[])].sort((a,b)=>a.year-b.year);
+
+  makeChart('chart-freq-full','bar',ft.map(x=>x.year),ft.map(x=>x.count),
+    ft.map(x=>`hsl(265,45%,${40+Math.round((x.count/Math.max(...ft.map(f=>f.count)))*25)}%)`), 'Menciones',
+    {plugins:{legend:{display:false}},
+     scales:{x:{title:{display:true,text:'Año'}},y:{beginAtZero:true,title:{display:true,text:'Menciones'}}}});
+
+  // Decades from concordances
+  const byDec = {};
+  concs.forEach(c => { if (c.publicationYear) { const d=Math.floor(c.publicationYear/10)*10; byDec[d]=(byDec[d]||0)+1; }});
+  const decs = Object.keys(byDec).map(Number).sort((a,b)=>a-b);
+  makeChart('chart-decades','bar',decs.map(d=>d+'s'),decs.map(d=>byDec[d]),
+    Array(decs.length).fill('#b87c2e'), 'Menciones',
+    {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
+
+  // Freq table
+  const tbody = document.getElementById('freq-tbody');
+  const maxC = Math.max(...ft.map(f=>f.count));
+  ft.forEach(f => {
+    const barW = Math.round((f.count/maxC)*180);
+    tbody.innerHTML += `<tr>
+      <td><strong>${f.year}</strong></td>
+      <td><strong>${f.count}</strong></td>
+      <td><div style="display:flex;align-items:center;gap:0.4rem">
+        <div style="height:8px;width:${barW}px;background:var(--primary-light);border-radius:3px"></div>
+        <span style="font-size:0.75rem;color:var(--text-muted)">${((f.count/maxC)*100).toFixed(0)}%</span>
+      </div></td></tr>`;
+  });
+}
+
+// ════════════════════════════════════════════
+// CONCORDANCIAS
+// ════════════════════════════════════════════
+function renderConcordancias(concs) {
+  // Filters
+  const years = [...new Set(concs.map(c=>c.publicationYear).filter(Boolean))].sort();
+  const selY = document.getElementById('conc-year');
+  years.forEach(y => { const o=document.createElement('option'); o.value=y; o.textContent=y; selY.appendChild(o); });
+
+  const pubs = [...new Set(concs.map(c=>shortPub(c.sourceFile)))].sort();
+  const selP = document.getElementById('conc-pub');
+  pubs.forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; selP.appendChild(o); });
+
+  filtConc = concs;
+  renderConcPage();
+}
+
+function filterConc() {
+  const q  = document.getElementById('conc-search').value.toLowerCase();
+  const yr = document.getElementById('conc-year').value;
+  const sn = document.getElementById('conc-sent').value;
+  const pb = document.getElementById('conc-pub').value;
+  const concs = D.concordancias || D.analisis.concordances || [];
+  filtConc = concs.filter(c =>
+    (!q  || c.snippet.toLowerCase().includes(q)) &&
+    (!yr || String(c.publicationYear)===yr) &&
+    (!sn || (c.sentiment||'Desconocido').toLowerCase()===sn.toLowerCase()) &&
+    (!pb || shortPub(c.sourceFile)===pb)
+  );
+  concPage = 1;
+  renderConcPage();
+}
+
+function renderConcPage() {
+  const total = filtConc.length;
+  const slice = filtConc.slice((concPage-1)*CONC_PER, concPage*CONC_PER);
+  document.getElementById('conc-count').textContent = `${total} resultado${total!==1?'s':''}`;
+  const el = document.getElementById('conc-list');
+
+  if (!slice.length) { el.innerHTML='<div class="empty">Sin concordancias para este filtro.</div>'; document.getElementById('conc-pag').innerHTML=''; return; }
+
+  el.innerHTML = slice.map((c,i) => {
+    const globalIdx = (concPage-1)*CONC_PER + i + 1;
+    const sClass = 's-'+(c.sentiment||'desconocido').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const entBadges = (c.entities||[]).map(e=>`<span class="ent-badge">${esc(e.name||e)}</span>`).join('');
+    const snippet = highlight(esc(clean(c.snippet)));
+    return `<div class="conc-item">
+      <div class="conc-meta">
+        <span style="font-size:0.7rem;color:var(--text-muted);margin-right:0.2rem">#${globalIdx}</span>
+        ${c.publicationYear ? `<span class="m-year">${c.publicationYear}</span>` : ''}
+        <span class="m-pub" title="${esc(c.sourceFile)}">${esc(shortPub(c.sourceFile))}</span>
+        ${c.sentiment ? `<span class="m-sent ${sClass}">${c.sentiment}</span>` : ''}
+      </div>
+      <div class="conc-text">${snippet}</div>
+      ${entBadges ? `<div class="conc-entities">${entBadges}</div>` : ''}
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.4rem">📁 ${esc(c.sourceFile)}</div>
+    </div>`;
+  }).join('');
+
+  makePagination('conc', Math.ceil(total/CONC_PER));
+}
+
+// ════════════════════════════════════════════
+// PATRONES
+// ════════════════════════════════════════════
+function renderPatrones(pats) {
+  const pubs = [...new Set(pats.map(p=>shortPub(p.sourceFile)))].sort();
+  const sel = document.getElementById('pat-pub');
+  pubs.forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; sel.appendChild(o); });
+
+  filtPat = pats;
+  renderPatPage();
+}
+
+function filterPat() {
+  const q  = document.getElementById('pat-search').value.toLowerCase();
+  const pb = document.getElementById('pat-pub').value;
+  filtPat = D.patrones.filter(p =>
+    (!q  || p.snippet.toLowerCase().includes(q)) &&
+    (!pb || shortPub(p.sourceFile)===pb)
+  );
+  patPage = 1;
+  renderPatPage();
+}
+
+function renderPatPage() {
+  const total = filtPat.length;
+  const slice = filtPat.slice((patPage-1)*PAT_PER, patPage*PAT_PER);
+  document.getElementById('pat-count').textContent = `${total} resultado${total!==1?'s':''}`;
+  const el = document.getElementById('pat-list');
+
+  if (!slice.length) { el.innerHTML='<div class="empty">Sin resultados.</div>'; document.getElementById('pat-pag').innerHTML=''; return; }
+
+  el.innerHTML = slice.map((p,i) => {
+    const globalIdx = (patPage-1)*PAT_PER + i + 1;
+    const pBadges = (p.matchedPattern||[]).map(mp=>`<span class="pat-badge">${esc(mp.word)} [${mp.pos}]</span>`).join(' ');
+    const snippet = highlight(esc(clean(p.snippet)));
+    return `<div class="conc-item">
+      <div class="conc-meta">
+        <span style="font-size:0.7rem;color:var(--text-muted)">#${globalIdx}</span>
+        ${p.publicationYear ? `<span class="m-year">${p.publicationYear}</span>` : ''}
+        <span class="m-pub" title="${esc(p.sourceFile)}">${esc(shortPub(p.sourceFile))}</span>
+        ${pBadges}
+      </div>
+      <div class="conc-text">${snippet}</div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.4rem">📁 ${esc(p.sourceFile)}</div>
+    </div>`;
+  }).join('');
+
+  makePagination('pat', Math.ceil(total/PAT_PER));
+}
+
+// ════════════════════════════════════════════
+// PUBLICACIONES
+// ════════════════════════════════════════════
+function renderPublicaciones(concs) {
+  const pc = {}, pyears = {}, psrc = {};
+  concs.forEach(c => {
+    const p = shortPub(c.sourceFile);
+    pc[p]=(pc[p]||0)+1;
+    psrc[p]=c.sourceFile;
+    if (c.publicationYear) { if (!pyears[p]) pyears[p]=new Set(); pyears[p].add(c.publicationYear); }
+  });
+  const sorted = Object.entries(pc).sort((a,b)=>b[1]-a[1]);
+  const maxC   = sorted[0]?.[1]||1;
+
+  makeChart('chart-pubs-full','bar',sorted.map(([k])=>k),sorted.map(([,v])=>v),
+    sorted.map((_,i)=>`hsl(${265+i*10},${40+i*2}%,${45+i*2}%)`), 'Menciones',
+    {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}});
+
+  const tbody = document.getElementById('pubs-tbody');
+  sorted.forEach(([name,count],i) => {
+    const yrs = pyears[name]?[...pyears[name]].sort():[];
+    const yr  = yrs.length>1?`${yrs[0]}–${yrs[yrs.length-1]}`:(yrs[0]||'—');
+    const barW= Math.round((count/maxC)*130);
+    tbody.innerHTML += `<tr>
+      <td>${i+1}</td>
+      <td><strong>${esc(name)}</strong></td>
+      <td style="font-size:0.73rem;color:var(--text-muted)">${esc((psrc[name]||'').replace('.txt',''))}</td>
+      <td>${yr}</td>
+      <td><strong>${count}</strong></td>
+      <td><div style="display:flex;align-items:center;gap:0.3rem">
+        <div style="height:6px;width:${barW}px;background:var(--primary-light);border-radius:3px"></div>
+        <span style="font-size:0.72rem;color:var(--text-muted)">${((count/concs.length)*100).toFixed(1)}%</span>
+      </div></td></tr>`;
+  });
+}
+
+// ════════════════════════════════════════════
+// PAGINATION
+// ════════════════════════════════════════════
+function makePagination(which, totalPages) {
+  const pg  = which==='conc'?concPage:which==='pat'?patPage:coentPage;
+  const el  = document.getElementById(which+'-pag')||document.getElementById(which+'-pagination');
+  if (!el || totalPages<=1) { if(el) el.innerHTML=''; return; }
+
+  let html = `<button class="pg" onclick="gp('${which}',${pg-1})" ${pg===1?'disabled':''}>‹</button>`;
+  const s=Math.max(1,pg-2), e=Math.min(totalPages,pg+2);
+  if(s>1) html+=`<button class="pg" onclick="gp('${which}',1)">1</button>${s>2?'<span class="pg-info">…</span>':''}`;
+  for(let i=s;i<=e;i++) html+=`<button class="pg ${i===pg?'active':''}" onclick="gp('${which}',${i})">${i}</button>`;
+  if(e<totalPages) html+=`${e<totalPages-1?'<span class="pg-info">…</span>':''}<button class="pg" onclick="gp('${which}',${totalPages})">${totalPages}</button>`;
+  html+=`<button class="pg" onclick="gp('${which}',${pg+1})" ${pg===totalPages?'disabled':''}>›</button>`;
+  html+=`<span class="pg-info">Pág. ${pg}/${totalPages}</span>`;
+  el.innerHTML = html;
+}
+
+function gp(which, page) {
+  if(which==='conc') { concPage=page; renderConcPage(); }
+  else if(which==='pat') { patPage=page; renderPatPage(); }
+  else if(which==='coent') { coentPage=page; renderCoentPage(); }
+}
+
+// ════════════════════════════════════════════
+// CHART FACTORY
+// ════════════════════════════════════════════
+function makeChart(id, type, labels, data, colors, label, extraOpts) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  new Chart(canvas, {
+    type,
+    data: { labels, datasets: [{ label, data, backgroundColor: colors, borderRadius: type==='bar'?4:0, borderWidth: type==='doughnut'||type==='pie'?2:0, borderColor:'#fff' }] },
+    options: Object.assign({ responsive: true, maintainAspectRatio: false }, extraOpts||{})
+  });
+}
+
+// ════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function shortPub(filename) {
+  if (!filename) return 'Desconocido';
+  const clean = filename.replace('.txt','');
+  const m = clean.match(/^([a-zA-ZÀ-ÿ\u00C0-\u024F\-]+(?:-[a-zA-ZÀ-ÿ\u00C0-\u024F]+)*)/);
+  if (m) {
+    const parts = m[1].split('-').filter(Boolean);
+    return parts.slice(0,4).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+  }
+  return clean.substring(0,40);
+}
+
+function highlight(text) {
+  return text.replace(/m[úu]sica\s+religiosa/gi, m=>`<mark>${m}</mark>`);
+}
+
+function clean(text) {
+  return (text||'').replace(/\r\n/g,' ').replace(/\s+/g,' ').trim();
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// BOOT
+init();
+</script>
+</body>
+</html>
