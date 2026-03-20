@@ -2,7 +2,7 @@
 
 Análisis semántico del término **«música religiosa»** en el corpus de prensa musical española histórica digitalizada (Biblioteca Nacional de España).
 
-**Proyecto**: LexiMus: Léxico y ontología de la música en español (PID2022-139589NB-C33)
+**Proyecto**: LexiMus: Léxico y ontología de la música en español (PID2022-139589NB-C32)
 **Instituciones**: Universidad de Salamanca · Instituto Complutense de Ciencias Musicales · Universidad de La Rioja
 
 ---
